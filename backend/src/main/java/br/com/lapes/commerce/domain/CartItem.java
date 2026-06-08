@@ -42,7 +42,31 @@ public class CartItem {
 
   protected CartItem() {}
 
+  public static CartItem create(Cart cart, Product product, Integer quantity) {
+    CartItem item = new CartItem();
+    item.cart = cart;
+    item.product = product;
+    item.quantity = quantity;
+    return item;
+  }
+
+  public void updateQuantity(Integer quantity) {
+    this.quantity = quantity;
+  }
+
   public UUID getId() {
     return id;
+  }
+
+  public Cart getCart() {
+    return cart;
+  }
+
+  public Product getProduct() {
+    return product;
+  }
+
+  public Integer getQuantity() {
+    return quantity;
   }
 }

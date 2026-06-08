@@ -75,6 +75,14 @@ Filtros de catalogo:
 - `page`
 - `size`
 
+Endpoints de carrinho:
+
+- `GET /api/cart`, restrito a `CUSTOMER`
+- `POST /api/cart/items`, restrito a `CUSTOMER`
+- `PUT /api/cart/items/{itemId}`, restrito a `CUSTOMER`
+- `DELETE /api/cart/items/{itemId}`, restrito a `CUSTOMER`
+- `DELETE /api/cart`, restrito a `CUSTOMER`
+
 Usuarios seedados:
 
 - Admin: `admin@lapes.test` / `password123`
@@ -118,5 +126,9 @@ Entregue nesta fase:
 - Cache Redis para listagem/detalhe de produtos, com invalidacao em criacao, edicao e remocao.
 - Rate limiting em memoria para endpoints publicos do catalogo.
 - Swagger/OpenAPI inicial com endpoints de autenticacao e catalogo.
+- Carrinho persistido por usuario autenticado.
+- Operacoes de adicionar item, remover item, atualizar quantidade e limpar carrinho.
+- Validacao de estoque ao adicionar e atualizar quantidade.
+- Respostas padronizadas para carrinho inexistente, item inexistente e estoque insuficiente.
 
 As proximas fases implementarao autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.

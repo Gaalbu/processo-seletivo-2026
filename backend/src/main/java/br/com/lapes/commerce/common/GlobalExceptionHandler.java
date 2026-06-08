@@ -2,6 +2,9 @@ package br.com.lapes.commerce.common;
 
 import br.com.lapes.commerce.auth.EmailAlreadyRegisteredException;
 import br.com.lapes.commerce.auth.InvalidCredentialsException;
+import br.com.lapes.commerce.cart.CartItemNotFoundException;
+import br.com.lapes.commerce.cart.CartNotFoundException;
+import br.com.lapes.commerce.cart.InsufficientStockException;
 import br.com.lapes.commerce.product.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
@@ -47,6 +50,19 @@ public class GlobalExceptionHandler {
       ProductNotFoundException exception, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler({CartNotFoundException.class, CartItemNotFoundException.class})
+  public ResponseEntity<ApiError> handleCartNotFound(RuntimeException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(InsufficientStockException.class)
+  public ResponseEntity<ApiError> handleInsufficientStock(
+      InsufficientStockException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .body(ApiError.of(422, "Unprocessable Entity", exception.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(Exception.class)
