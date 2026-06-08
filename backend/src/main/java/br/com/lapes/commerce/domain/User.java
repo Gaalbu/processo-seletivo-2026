@@ -43,6 +43,15 @@ public class User {
 
   protected User() {}
 
+  public static User customer(String name, String email, String passwordHash) {
+    User user = new User();
+    user.name = name;
+    user.email = email;
+    user.passwordHash = passwordHash;
+    user.role = UserRole.CUSTOMER;
+    return user;
+  }
+
   public UUID getId() {
     return id;
   }

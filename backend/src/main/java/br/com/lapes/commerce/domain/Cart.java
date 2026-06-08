@@ -35,6 +35,12 @@ public class Cart {
 
   protected Cart() {}
 
+  public static Cart forUser(User user) {
+    Cart cart = new Cart();
+    cart.user = user;
+    return cart;
+  }
+
   public UUID getId() {
     return id;
   }

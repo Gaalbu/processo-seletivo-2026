@@ -13,3 +13,12 @@ spring:
     hibernate:
       ddl-auto: none
     open-in-view: false
+
+app:
+  jwt:
+    secret: test-secret-change-me-test-secret-change-me-test-secret-change-me
+    expiration-minutes: 120
+  rate-limit:
+    auth:
+      capacity: 10
+      refill-window-seconds: 60

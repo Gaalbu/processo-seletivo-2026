@@ -50,6 +50,18 @@ API local:
 - Health: `http://localhost:8080/api/health`
 - Actuator health: `http://localhost:8080/actuator/health`
 
+Endpoints de autenticacao:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `GET /api/admin/ping`, restrito a `ADMIN`
+
+Usuarios seedados:
+
+- Admin: `admin@lapes.test` / `password123`
+- Cliente: `cliente@lapes.test` / `password123`
+
 ## Como Rodar O Frontend
 
 ```bash
@@ -79,5 +91,9 @@ Entregue nesta fase:
 - Migrations Flyway para criacao do schema inicial.
 - Seed inicial com usuarios, carrinho, produtos e cupons de exemplo.
 - Configuracao de teste com H2 para permitir `mvn test` sem depender de Docker local.
+- Autenticacao com registro, login, JWT e hash BCrypt de senha.
+- Protecao stateless de rotas com roles `ADMIN` e `CUSTOMER`.
+- Rate limiting em memoria para login e registro.
+- Respostas padronizadas de erro para validacao, credenciais invalidas, 401, 403 e 429.
 
 As proximas fases implementarao autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.

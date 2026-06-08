@@ -1,7 +1,7 @@
 insert into users (id, name, email, password_hash, role)
 values
-  ('00000000-0000-0000-0000-000000000001', 'Admin LAPES', 'admin@lapes.test', '$2a$10$kHEQY5cOXXEvdNQe3ZA6te5eAnNrkX47S1NCQxUKyYPlXJLuodwRW', 'ADMIN'),
-  ('00000000-0000-0000-0000-000000000002', 'Cliente LAPES', 'cliente@lapes.test', '$2a$10$kHEQY5cOXXEvdNQe3ZA6te5eAnNrkX47S1NCQxUKyYPlXJLuodwRW', 'CUSTOMER');
+  ('00000000-0000-0000-0000-000000000001', 'Admin LAPES', 'admin@lapes.test', '$2a$10$3UsGNqmtVsKGSXIgbmVa8eVRKpLZNZ8gK5WgWvc7I9Gv8cuz1C5Oq', 'ADMIN'),
+  ('00000000-0000-0000-0000-000000000002', 'Cliente LAPES', 'cliente@lapes.test', '$2a$10$3UsGNqmtVsKGSXIgbmVa8eVRKpLZNZ8gK5WgWvc7I9Gv8cuz1C5Oq', 'CUSTOMER');
 
 insert into carts (id, user_id)
 values
