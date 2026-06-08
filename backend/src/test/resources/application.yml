@@ -7,6 +7,8 @@ spring:
     redis:
       repositories:
         enabled: false
+  cache:
+    type: simple
   flyway:
     enabled: false
   jpa:
@@ -21,4 +23,7 @@ app:
   rate-limit:
     auth:
       capacity: 10
+      refill-window-seconds: 60
+    catalog:
+      capacity: 60
       refill-window-seconds: 60

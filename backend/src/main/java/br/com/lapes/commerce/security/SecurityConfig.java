@@ -4,8 +4,6 @@ import br.com.lapes.commerce.domain.UserRole;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,8 +24,7 @@ public class SecurityConfig {
       HttpSecurity http,
       JwtAuthenticationFilter jwtAuthenticationFilter,
       JsonAuthenticationEntryPoint authenticationEntryPoint,
-      JsonAccessDeniedHandler accessDeniedHandler,
-      AuthenticationProvider authenticationProvider)
+      JsonAccessDeniedHandler accessDeniedHandler)
       throws Exception {
     return http
         .csrf(csrf -> csrf.disable())
@@ -37,10 +34,18 @@ public class SecurityConfig {
                 exceptions
                     .authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler))
-        .authenticationProvider(authenticationProvider)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/api/auth/register", "/api/auth/login", "/api/health", "/actuator/health")
+                auth.requestMatchers(
+                        "/api/auth/register",
+                        "/api/auth/login",
+                        "/api/health",
+                        "/actuator/health",
+                        "/api/products",
+                        "/api/products/*",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
                     .hasRole(UserRole.ADMIN.name())
@@ -48,15 +53,6 @@ public class SecurityConfig {
                     .authenticated())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
-  }
-
-  @Bean
-  public AuthenticationProvider authenticationProvider(
-      UserPrincipalService userPrincipalService, PasswordEncoder passwordEncoder) {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-    provider.setUserDetailsService(userPrincipalService);
-    provider.setPasswordEncoder(passwordEncoder);
-    return provider;
   }
 
   @Bean

@@ -49,6 +49,7 @@ API local:
 
 - Health: `http://localhost:8080/api/health`
 - Actuator health: `http://localhost:8080/actuator/health`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
 
 Endpoints de autenticacao:
 
@@ -56,6 +57,23 @@ Endpoints de autenticacao:
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 - `GET /api/admin/ping`, restrito a `ADMIN`
+
+Endpoints de catalogo:
+
+- `GET /api/products`
+- `GET /api/products/{id}`
+- `POST /api/admin/products`, restrito a `ADMIN`
+- `PUT /api/admin/products/{id}`, restrito a `ADMIN`
+- `DELETE /api/admin/products/{id}`, restrito a `ADMIN`
+
+Filtros de catalogo:
+
+- `name`
+- `category`
+- `minPrice`
+- `maxPrice`
+- `page`
+- `size`
 
 Usuarios seedados:
 
@@ -95,5 +113,10 @@ Entregue nesta fase:
 - Protecao stateless de rotas com roles `ADMIN` e `CUSTOMER`.
 - Rate limiting em memoria para login e registro.
 - Respostas padronizadas de erro para validacao, credenciais invalidas, 401, 403 e 429.
+- Catalogo publico com listagem, detalhe, filtros e paginacao.
+- CRUD administrativo de produtos com soft delete.
+- Cache Redis para listagem/detalhe de produtos, com invalidacao em criacao, edicao e remocao.
+- Rate limiting em memoria para endpoints publicos do catalogo.
+- Swagger/OpenAPI inicial com endpoints de autenticacao e catalogo.
 
 As proximas fases implementarao autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.

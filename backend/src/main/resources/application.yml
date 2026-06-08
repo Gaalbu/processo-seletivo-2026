@@ -11,6 +11,10 @@ spring:
       port: ${SPRING_DATA_REDIS_PORT:6379}
       repositories:
         enabled: false
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300s
   flyway:
     enabled: true
   jpa:
@@ -29,6 +33,13 @@ app:
     auth:
       capacity: ${APP_RATE_LIMIT_AUTH_CAPACITY:10}
       refill-window-seconds: ${APP_RATE_LIMIT_AUTH_REFILL_WINDOW_SECONDS:60}
+    catalog:
+      capacity: ${APP_RATE_LIMIT_CATALOG_CAPACITY:60}
+      refill-window-seconds: ${APP_RATE_LIMIT_CATALOG_REFILL_WINDOW_SECONDS:60}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 
 management:
   endpoints:

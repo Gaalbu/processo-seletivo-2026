@@ -2,6 +2,7 @@ package br.com.lapes.commerce.common;
 
 import br.com.lapes.commerce.auth.EmailAlreadyRegisteredException;
 import br.com.lapes.commerce.auth.InvalidCredentialsException;
+import br.com.lapes.commerce.product.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,6 +40,13 @@ public class GlobalExceptionHandler {
       InvalidCredentialsException exception, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(ApiError.of(401, "Unauthorized", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(ProductNotFoundException.class)
+  public ResponseEntity<ApiError> handleProductNotFound(
+      ProductNotFoundException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(Exception.class)

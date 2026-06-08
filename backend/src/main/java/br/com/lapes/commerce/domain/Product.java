@@ -55,6 +55,37 @@ public class Product {
 
   protected Product() {}
 
+  public static Product create(
+      String name,
+      String description,
+      BigDecimal price,
+      Integer stock,
+      String category,
+      String imageUrl) {
+    Product product = new Product();
+    product.update(name, description, price, stock, category, imageUrl);
+    return product;
+  }
+
+  public void update(
+      String name,
+      String description,
+      BigDecimal price,
+      Integer stock,
+      String category,
+      String imageUrl) {
+    this.name = name;
+    this.description = description;
+    this.price = price;
+    this.stock = stock;
+    this.category = category;
+    this.imageUrl = imageUrl;
+  }
+
+  public void softDelete() {
+    this.deletedAt = Instant.now();
+  }
+
   public UUID getId() {
     return id;
   }
@@ -65,6 +96,10 @@ public class Product {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getDescription() {
+    return description;
   }
 
   public BigDecimal getPrice() {
@@ -81,5 +116,17 @@ public class Product {
 
   public void setStock(Integer stock) {
     this.stock = stock;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  public Instant getDeletedAt() {
+    return deletedAt;
   }
 }
