@@ -86,6 +86,14 @@ public class Product {
     this.deletedAt = Instant.now();
   }
 
+  public void reserveStock(int quantity) {
+    this.stock -= quantity;
+  }
+
+  public void returnStock(int quantity) {
+    this.stock += quantity;
+  }
+
   public UUID getId() {
     return id;
   }

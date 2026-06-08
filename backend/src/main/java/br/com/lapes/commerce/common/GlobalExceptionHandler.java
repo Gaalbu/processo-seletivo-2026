@@ -5,6 +5,11 @@ import br.com.lapes.commerce.auth.InvalidCredentialsException;
 import br.com.lapes.commerce.cart.CartItemNotFoundException;
 import br.com.lapes.commerce.cart.CartNotFoundException;
 import br.com.lapes.commerce.cart.InsufficientStockException;
+import br.com.lapes.commerce.order.EmptyCartException;
+import br.com.lapes.commerce.order.InvalidCouponException;
+import br.com.lapes.commerce.order.InvalidOrderTransitionException;
+import br.com.lapes.commerce.order.OrderCancellationNotAllowedException;
+import br.com.lapes.commerce.order.OrderNotFoundException;
 import br.com.lapes.commerce.product.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
@@ -58,11 +63,31 @@ public class GlobalExceptionHandler {
         .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
   }
 
+  @ExceptionHandler(OrderNotFoundException.class)
+  public ResponseEntity<ApiError> handleOrderNotFound(
+      OrderNotFoundException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
+  }
+
   @ExceptionHandler(InsufficientStockException.class)
   public ResponseEntity<ApiError> handleInsufficientStock(
       InsufficientStockException exception, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
         .body(ApiError.of(422, "Unprocessable Entity", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler({EmptyCartException.class, InvalidCouponException.class, InvalidOrderTransitionException.class})
+  public ResponseEntity<ApiError> handleBusinessRule(RuntimeException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .body(ApiError.of(422, "Unprocessable Entity", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(OrderCancellationNotAllowedException.class)
+  public ResponseEntity<ApiError> handleCancellationNotAllowed(
+      OrderCancellationNotAllowedException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ApiError.of(409, "Conflict", exception.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(Exception.class)

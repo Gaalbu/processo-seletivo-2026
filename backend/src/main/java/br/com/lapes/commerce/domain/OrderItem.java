@@ -41,7 +41,38 @@ public class OrderItem {
 
   protected OrderItem() {}
 
+  public static OrderItem create(Order order, Product product, Integer quantity) {
+    OrderItem item = new OrderItem();
+    item.order = order;
+    item.product = product;
+    item.productName = product.getName();
+    item.unitPrice = product.getPrice();
+    item.quantity = quantity;
+    item.lineTotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    return item;
+  }
+
   public UUID getId() {
     return id;
+  }
+
+  public Product getProduct() {
+    return product;
+  }
+
+  public String getProductName() {
+    return productName;
+  }
+
+  public BigDecimal getUnitPrice() {
+    return unitPrice;
+  }
+
+  public Integer getQuantity() {
+    return quantity;
+  }
+
+  public BigDecimal getLineTotal() {
+    return lineTotal;
   }
 }

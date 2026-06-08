@@ -57,4 +57,24 @@ public class Coupon {
   public String getCode() {
     return code;
   }
+
+  public CouponType getType() {
+    return type;
+  }
+
+  public BigDecimal getValue() {
+    return value;
+  }
+
+  public BigDecimal getMinimumOrderAmount() {
+    return minimumOrderAmount;
+  }
+
+  public Instant getExpiresAt() {
+    return expiresAt;
+  }
+
+  public Boolean getActive() {
+    return active;
+  }
 }

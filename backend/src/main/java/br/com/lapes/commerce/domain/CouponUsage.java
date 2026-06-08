@@ -38,6 +38,14 @@ public class CouponUsage {
 
   protected CouponUsage() {}
 
+  public static CouponUsage create(Coupon coupon, User user, Order order) {
+    CouponUsage usage = new CouponUsage();
+    usage.coupon = coupon;
+    usage.user = user;
+    usage.order = order;
+    return usage;
+  }
+
   public UUID getId() {
     return id;
   }

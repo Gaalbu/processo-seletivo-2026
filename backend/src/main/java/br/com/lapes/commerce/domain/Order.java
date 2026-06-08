@@ -59,8 +59,59 @@ public class Order {
 
   protected Order() {}
 
+  public static Order create(
+      User user,
+      Coupon coupon,
+      BigDecimal subtotalAmount,
+      BigDecimal discountAmount,
+      BigDecimal totalAmount,
+      PaymentStatus paymentStatus) {
+    Order order = new Order();
+    order.user = user;
+    order.coupon = coupon;
+    order.subtotalAmount = subtotalAmount;
+    order.discountAmount = discountAmount;
+    order.totalAmount = totalAmount;
+    order.paymentStatus = paymentStatus;
+    order.status = paymentStatus == PaymentStatus.APPROVED ? OrderStatus.PAID : OrderStatus.PENDING;
+    return order;
+  }
+
+  public void cancel() {
+    this.status = OrderStatus.CANCELLED;
+  }
+
+  public void updateStatus(OrderStatus status) {
+    this.status = status;
+  }
+
+  public void markPaid() {
+    this.status = OrderStatus.PAID;
+    this.paymentStatus = PaymentStatus.APPROVED;
+  }
+
   public UUID getId() {
     return id;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public Coupon getCoupon() {
+    return coupon;
+  }
+
+  public BigDecimal getSubtotalAmount() {
+    return subtotalAmount;
+  }
+
+  public BigDecimal getDiscountAmount() {
+    return discountAmount;
+  }
+
+  public BigDecimal getTotalAmount() {
+    return totalAmount;
   }
 
   public OrderStatus getStatus() {
@@ -69,5 +120,13 @@ public class Order {
 
   public void setStatus(OrderStatus status) {
     this.status = status;
+  }
+
+  public PaymentStatus getPaymentStatus() {
+    return paymentStatus;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
   }
 }

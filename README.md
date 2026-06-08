@@ -83,6 +83,21 @@ Endpoints de carrinho:
 - `DELETE /api/cart/items/{itemId}`, restrito a `CUSTOMER`
 - `DELETE /api/cart`, restrito a `CUSTOMER`
 
+Endpoints de checkout e pedidos:
+
+- `POST /api/checkout`, restrito a `CUSTOMER`
+- `GET /api/orders`, restrito a `CUSTOMER`
+- `GET /api/orders/{id}`, restrito a `CUSTOMER`
+- `POST /api/orders/{id}/cancel`, restrito a `CUSTOMER`
+- `GET /api/admin/orders`, restrito a `ADMIN`
+- `PUT /api/admin/orders/{id}/status`, restrito a `ADMIN`
+- `POST /api/admin/orders/{id}/cancel`, restrito a `ADMIN`
+
+Checkout:
+
+- `couponCode`: codigo opcional de cupom.
+- `paymentApproved`: `true` ou omitido simula pagamento aprovado; `false` simula falha de pagamento.
+
 Usuarios seedados:
 
 - Admin: `admin@lapes.test` / `password123`
@@ -130,5 +145,13 @@ Entregue nesta fase:
 - Operacoes de adicionar item, remover item, atualizar quantidade e limpar carrinho.
 - Validacao de estoque ao adicionar e atualizar quantidade.
 - Respostas padronizadas para carrinho inexistente, item inexistente e estoque insuficiente.
+- Checkout transacional com lock pessimista nos produtos para evitar overselling.
+- Calculo do total com snapshot de preco no momento do checkout.
+- Aplicacao de cupons percentuais ou de valor fixo.
+- Validacao de cupom expirado/inativo, uso unico por usuario e valor minimo do pedido.
+- Simulacao de pagamento aprovado ou falho.
+- Criacao de pedidos com itens historicos e estados `PENDING`, `PAID`, `SHIPPED`, `DELIVERED` e `CANCELLED`.
+- Cancelamento antes de envio com devolucao de estoque quando o pedido estava pago.
+- Administracao basica de pedidos com listagem, atualizacao de status e cancelamento.
 
 As proximas fases implementarao autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.
