@@ -153,5 +153,23 @@ Entregue nesta fase:
 - Criacao de pedidos com itens historicos e estados `PENDING`, `PAID`, `SHIPPED`, `DELIVERED` e `CANCELLED`.
 - Cancelamento antes de envio com devolucao de estoque quando o pedido estava pago.
 - Administracao basica de pedidos com listagem, atualizacao de status e cancelamento.
+- Testes automatizados dos fluxos criticos de checkout aprovado, falha de pagamento, cupons e concorrencia no ultimo item em estoque.
+
+## Testes
+
+```bash
+cd backend
+mvn test
+```
+
+Cobertura critica atual:
+
+- Checkout aprovado reserva estoque, limpa carrinho e preserva snapshot de preco.
+- Falha de pagamento nao reserva estoque e nao limpa carrinho.
+- Cupom percentual calcula desconto e registra uso unico.
+- Cupom expirado e rejeitado.
+- Cupom com valor minimo nao atingido e rejeitado.
+- Cupom ja usado pelo usuario e rejeitado.
+- Duas tentativas simultaneas de checkout para o ultimo item permitem apenas uma compra.
 
 As proximas fases implementarao autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.
