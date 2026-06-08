@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:lapes_commerce_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  data:
+    redis:
+      repositories:
+        enabled: false
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false

@@ -10,6 +10,29 @@ jobs:
   backend:
     name: Backend
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: lapes_commerce
+          POSTGRES_USER: lapes
+          POSTGRES_PASSWORD: lapes
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lapes -d lapes_commerce"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,6 +47,12 @@ jobs:
       - name: Build and test backend
         working-directory: backend
         run: mvn test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/lapes_commerce
+          SPRING_DATASOURCE_USERNAME: lapes
+          SPRING_DATASOURCE_PASSWORD: lapes
+          SPRING_DATA_REDIS_HOST: localhost
+          SPRING_DATA_REDIS_PORT: 6379
 
   frontend:
     name: Frontend

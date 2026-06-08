@@ -64,7 +64,7 @@ Web local:
 
 ## Status Da Implementacao
 
-Fase atual: base do projeto.
+Fase atual: base de dados e modelo de dominio.
 
 Entregue nesta fase:
 
@@ -73,5 +73,11 @@ Entregue nesta fase:
 - Aplicacao Next.js inicial com tema dark inspirado na estetica terminal.
 - Docker Compose com PostgreSQL e Redis.
 - CI basico com build/testes de backend e build de frontend.
+- Dependencias de persistencia com Spring Data JPA, PostgreSQL, Redis e Flyway.
+- Entidades e enums dos dominios de usuarios, produtos, carrinho, pedidos e cupons.
+- Repositorios Spring Data para os agregados principais.
+- Migrations Flyway para criacao do schema inicial.
+- Seed inicial com usuarios, carrinho, produtos e cupons de exemplo.
+- Configuracao de teste com H2 para permitir `mvn test` sem depender de Docker local.
 
-As proximas fases implementarao modelo de dados, autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.
+As proximas fases implementarao autenticacao, catalogo, carrinho, checkout, cupons, testes criticos e documentacao final.

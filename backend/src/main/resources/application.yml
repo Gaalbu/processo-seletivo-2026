@@ -1,6 +1,22 @@
 spring:
   application:
     name: lapes-commerce-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/lapes_commerce}
+    username: ${SPRING_DATASOURCE_USERNAME:lapes}
+    password: ${SPRING_DATASOURCE_PASSWORD:lapes}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      repositories:
+        enabled: false
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
 
 server:
   port: 8080
