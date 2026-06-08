@@ -1,0 +1,37 @@
+.main {
+  align-items: center;
+  display: flex;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  margin: 0 auto;
+  max-width: 720px;
+  padding: 32px;
+}
+
+.panel h1 {
+  color: #f0f6fc;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  line-height: 1;
+  margin: 0 0 24px;
+}
+
+.panel p {
+  color: #8b949e;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.eyebrow {
+  color: #39d353 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem !important;
+  margin-bottom: 16px !important;
+  text-transform: uppercase;
+}
