@@ -27,3 +27,7 @@ export function removeCartItem(token: string, itemId: string) {
     token,
   });
 }
+
+export function clearCart(token: string) {
+  return apiRequest<void>("/cart", { method: "DELETE", token });
+}

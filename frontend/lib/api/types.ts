@@ -47,3 +47,27 @@ export type Cart = {
   items: CartItem[];
   subtotal: number;
 };
+
+export type OrderStatus = "PENDING" | "PAID" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+export type PaymentStatus = "PENDING" | "APPROVED" | "FAILED";
+
+export type OrderItem = {
+  id: string;
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+};
+
+export type Order = {
+  id: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  couponCode: string | null;
+  subtotalAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  createdAt: string;
+  items: OrderItem[];
+};

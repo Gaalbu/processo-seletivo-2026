@@ -60,6 +60,20 @@
   color: var(--accent);
 }
 
+.nav button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+}
+
+.nav button:hover {
+  color: var(--accent);
+}
+
 @media (max-width: 900px) {
   .header {
     grid-template-columns: 1fr auto;

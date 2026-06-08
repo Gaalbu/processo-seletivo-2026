@@ -157,6 +157,23 @@ Entregue nesta fase:
 - Fundacao visual do frontend com tema Terminal Moderno, layout base, header fixo, cards de produto, badges, botoes, inputs e preview de carrinho/status.
 - Cliente HTTP do frontend para autenticacao, catalogo e carrinho.
 - Estrutura client-side inicial para persistencia de sessao JWT no navegador.
+- Frontend funcional com login, registro, catalogo com filtros, carrinho persistido, checkout com cupom, simulacao de falha de pagamento e pedidos do cliente.
+- Painel admin basico para criar/remover produtos, listar pedidos e atualizar status.
+
+## Interface Web
+
+Rotas principais:
+
+- `/`: catalogo, filtros, carrinho e checkout.
+- `/login`: autenticacao com JWT.
+- `/register`: cadastro de cliente.
+- `/orders`: pedidos do cliente autenticado.
+- `/admin`: painel administrativo para usuario `ADMIN`.
+
+Credenciais uteis para testar a interface depois do seed:
+
+- Cliente: `cliente@lapes.test` / `password123`
+- Admin: `admin@lapes.test` / `password123`
 
 ## Testes
 
