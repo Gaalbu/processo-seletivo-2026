@@ -154,6 +154,9 @@ Entregue nesta fase:
 - Cancelamento antes de envio com devolucao de estoque quando o pedido estava pago.
 - Administracao basica de pedidos com listagem, atualizacao de status e cancelamento.
 - Testes automatizados dos fluxos criticos de checkout aprovado, falha de pagamento, cupons e concorrencia no ultimo item em estoque.
+- Fundacao visual do frontend com tema Terminal Moderno, layout base, header fixo, cards de produto, badges, botoes, inputs e preview de carrinho/status.
+- Cliente HTTP do frontend para autenticacao, catalogo e carrinho.
+- Estrutura client-side inicial para persistencia de sessao JWT no navegador.
 
 ## Testes
 
