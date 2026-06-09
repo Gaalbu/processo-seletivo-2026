@@ -10,6 +10,7 @@ import br.com.lapes.commerce.repository.CartItemRepository;
 import br.com.lapes.commerce.repository.CouponUsageRepository;
 import br.com.lapes.commerce.repository.ProductRepository;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -235,7 +236,7 @@ class OrderServiceIntegrationTests {
         type,
         new BigDecimal(value),
         new BigDecimal(minimumOrderAmount),
-        expiresAt,
+        OffsetDateTime.parse(expiresAt),
         active);
   }
 }
