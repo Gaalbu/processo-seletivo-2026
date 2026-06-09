@@ -2,6 +2,7 @@ package br.com.lapes.commerce.order;
 
 import br.com.lapes.commerce.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/orders")
 @PreAuthorize("hasRole('CUSTOMER')")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Orders", description = "Customer orders")
 public class OrderController {
 

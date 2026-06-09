@@ -38,7 +38,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
       return;
     }
 
-    setCart(await fetchCart(token));
+    try {
+      setCart(await fetchCart(token));
+    } catch {
+      setCart(null);
+    }
   }, [token, user?.role]);
 
   useEffect(() => {

@@ -2,6 +2,7 @@ package br.com.lapes.commerce.order;
 
 import br.com.lapes.commerce.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/checkout")
 @PreAuthorize("hasRole('CUSTOMER')")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Checkout", description = "Checkout and payment simulation")
 public class CheckoutController {
 

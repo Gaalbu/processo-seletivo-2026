@@ -13,6 +13,7 @@ import br.com.lapes.commerce.domain.OrderStatus;
 import br.com.lapes.commerce.domain.PaymentStatus;
 import br.com.lapes.commerce.domain.Product;
 import br.com.lapes.commerce.domain.User;
+import br.com.lapes.commerce.product.ProductNotFoundException;
 import br.com.lapes.commerce.repository.CartItemRepository;
 import br.com.lapes.commerce.repository.CartRepository;
 import br.com.lapes.commerce.repository.CouponRepository;
@@ -73,8 +74,12 @@ public class OrderService {
     }
 
     List<Product> lockedProducts =
-        cartItems.stream()
-            .map(item -> productRepository.findActiveByIdForUpdate(item.getProduct().getId()).orElseThrow())
+      cartItems.stream()
+            .map(
+                item ->
+                    productRepository
+                        .findActiveByIdForUpdate(item.getProduct().getId())
+                        .orElseThrow(ProductNotFoundException::new))
             .toList();
 
     BigDecimal subtotal = BigDecimal.ZERO;
@@ -169,7 +174,10 @@ public class OrderService {
 
   private void markPendingOrderAsPaid(Order order) {
     for (OrderItem item : orderItemRepository.findByOrderId(order.getId())) {
-      Product product = productRepository.findActiveByIdForUpdate(item.getProduct().getId()).orElseThrow();
+      Product product =
+          productRepository
+              .findActiveByIdForUpdate(item.getProduct().getId())
+              .orElseThrow(ProductNotFoundException::new);
       if (item.getQuantity() > product.getStock()) {
         throw new InsufficientStockException();
       }

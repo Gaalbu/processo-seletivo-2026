@@ -29,9 +29,14 @@ export default function AdminPage() {
 
   const load = useCallback(async () => {
     if (!token || user?.role !== "ADMIN") return;
-    const [productPage, adminOrders] = await Promise.all([listProducts({ size: 20 }), listAdminOrders(token)]);
-    setProducts(productPage.content);
-    setOrders(adminOrders);
+    try {
+      const [productPage, adminOrders] = await Promise.all([listProducts({ size: 20 }), listAdminOrders(token)]);
+      setProducts(productPage.content);
+      setOrders(adminOrders);
+      setMessage(`>_ admin_loaded: ${productPage.content.length} products / ${adminOrders.length} orders`);
+    } catch {
+      setMessage(">_ failed_to_load_admin_data");
+    }
   }, [token, user?.role]);
 
   useEffect(() => {
@@ -41,31 +46,43 @@ export default function AdminPage() {
   async function submitProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!token) return;
-    await createProduct(token, {
-      name: form.name,
-      description: form.description,
-      price: Number(form.price),
-      stock: Number(form.stock),
-      category: form.category,
-      imageUrl: form.imageUrl,
-    });
-    setMessage(">_ product_created");
-    setForm({ name: "", description: "", price: "", stock: "", category: "", imageUrl: "https://example.com/image.png" });
-    await load();
+    try {
+      await createProduct(token, {
+        name: form.name,
+        description: form.description,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        category: form.category,
+        imageUrl: form.imageUrl,
+      });
+      setMessage(">_ product_created");
+      setForm({ name: "", description: "", price: "", stock: "", category: "", imageUrl: "https://example.com/image.png" });
+      await load();
+    } catch {
+      setMessage(">_ failed_to_create_product");
+    }
   }
 
   async function removeProduct(id: string) {
     if (!token) return;
-    await deleteProduct(token, id);
-    setMessage(">_ product_deleted");
-    await load();
+    try {
+      await deleteProduct(token, id);
+      setMessage(">_ product_deleted");
+      await load();
+    } catch {
+      setMessage(">_ failed_to_delete_product");
+    }
   }
 
   async function changeStatus(id: string, status: OrderStatus) {
     if (!token) return;
-    await updateOrderStatus(token, id, status);
-    setMessage(">_ order_status_updated");
-    await load();
+    try {
+      await updateOrderStatus(token, id, status);
+      setMessage(">_ order_status_updated");
+      await load();
+    } catch {
+      setMessage(">_ failed_to_update_order");
+    }
   }
 
   if (user?.role !== "ADMIN") {

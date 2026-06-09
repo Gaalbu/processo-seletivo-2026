@@ -33,8 +33,12 @@ export default function OrdersPage() {
 
   async function cancel(id: string) {
     if (!token) return;
-    await cancelOrder(token, id);
-    await load();
+    try {
+      await cancelOrder(token, id);
+      await load();
+    } catch {
+      setMessage(">_ failed_to_cancel_order");
+    }
   }
 
   if (!user) {

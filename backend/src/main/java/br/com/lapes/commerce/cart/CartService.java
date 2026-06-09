@@ -8,6 +8,7 @@ import br.com.lapes.commerce.repository.CartItemRepository;
 import br.com.lapes.commerce.repository.CartRepository;
 import br.com.lapes.commerce.repository.ProductRepository;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,19 @@ public class CartService {
   @Transactional(readOnly = true)
   public CartResponse getCart(UUID userId) {
     Cart cart = cart(userId);
-    return toResponse(cart, cartItemRepository.findByCartIdOrderByCreatedAtAsc(cart.getId()));
+    List<CartItem> items = cartItemRepository.findByCartIdOrderByCreatedAtAsc(cart.getId());
+    List<CartItemResponse> activeItems = new ArrayList<>(items.size());
+
+    for (CartItem item : items) {
+      if (productRepository.findDeletedAtById(item.getProduct().getId()) != null) {
+        cartItemRepository.delete(item);
+        continue;
+      }
+      Product product = item.getProduct();
+      activeItems.add(toResponse(item, product));
+    }
+
+    return toResponse(cart, activeItems);
   }
 
   @Transactional
@@ -109,12 +122,24 @@ public class CartService {
     }
   }
 
-  private CartResponse toResponse(Cart cart, List<CartItem> items) {
-    List<CartItemResponse> itemResponses = items.stream().map(CartItemResponse::from).toList();
+  private CartResponse toResponse(Cart cart, List<CartItemResponse> itemResponses) {
     BigDecimal subtotal =
         itemResponses.stream()
             .map(CartItemResponse::lineTotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     return new CartResponse(cart.getId(), itemResponses, subtotal);
+  }
+
+  private CartItemResponse toResponse(CartItem item, Product product) {
+    BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+    return new CartItemResponse(
+        item.getId(),
+        product.getId(),
+        product.getName(),
+        product.getPrice(),
+        item.getQuantity(),
+        product.getStock(),
+        product.getImageUrl(),
+        lineTotal);
   }
 }

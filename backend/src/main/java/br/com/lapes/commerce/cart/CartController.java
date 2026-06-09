@@ -3,6 +3,7 @@ package br.com.lapes.commerce.cart;
 import br.com.lapes.commerce.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cart")
 @PreAuthorize("hasRole('CUSTOMER')")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Cart", description = "Authenticated customer shopping cart")
 public class CartController {
 

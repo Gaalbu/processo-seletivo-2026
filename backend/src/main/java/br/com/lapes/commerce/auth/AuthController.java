@@ -4,6 +4,7 @@ import br.com.lapes.commerce.security.AuthenticatedUser;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,7 @@ public class AuthController {
   }
 
   @GetMapping("/me")
+  @SecurityRequirement(name = "bearerAuth")
   public AuthResponse.UserResponse me(@AuthenticationPrincipal AuthenticatedUser user) {
     return new AuthResponse.UserResponse(user.id(), user.name(), user.getUsername(), user.role());
   }

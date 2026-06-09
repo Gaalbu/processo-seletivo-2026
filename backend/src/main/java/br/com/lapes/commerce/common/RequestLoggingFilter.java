@@ -41,7 +41,11 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
       log.put("route", request.getRequestURI());
       log.put("statusCode", response.getStatus());
       log.put("durationMs", durationMs);
-      LOGGER.info(objectMapper.writeValueAsString(log));
+      try {
+        LOGGER.info(objectMapper.writeValueAsString(log));
+      } catch (Exception exception) {
+        LOGGER.warn("Failed to serialize request log: {}", log, exception);
+      }
     }
   }
 }

@@ -16,9 +16,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,6 +37,16 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.badRequest()
         .body(ApiError.validation("Invalid request body", request.getRequestURI(), fields));
+  }
+
+  @ExceptionHandler({
+    MethodArgumentTypeMismatchException.class,
+    MissingServletRequestParameterException.class,
+    HttpMessageNotReadableException.class
+  })
+  public ResponseEntity<ApiError> handleBadRequest(Exception exception, HttpServletRequest request) {
+    return ResponseEntity.badRequest()
+        .body(ApiError.of(400, "Bad Request", "Invalid request parameters", request.getRequestURI()));
   }
 
   @ExceptionHandler(EmailAlreadyRegisteredException.class)

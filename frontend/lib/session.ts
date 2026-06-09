@@ -22,6 +22,11 @@ export function loadSession(): Session | null {
     return null;
   }
 
+  if (isExpired(token)) {
+    clearSession();
+    return null;
+  }
+
   return {
     token,
     user: JSON.parse(user) as AuthUser,
@@ -31,4 +36,19 @@ export function loadSession(): Session | null {
 export function clearSession() {
   window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
+}
+
+function isExpired(token: string) {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return true;
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
+    const parsed = JSON.parse(window.atob(padded)) as { exp?: number };
+
+    return typeof parsed.exp !== "number" || parsed.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
 }

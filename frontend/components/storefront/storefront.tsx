@@ -85,9 +85,13 @@ export function Storefront() {
 
   async function clearCurrentCart() {
     if (!token) return;
-    await clearCart(token);
-    await refreshCart();
-    setMessage("cart_cleared");
+    try {
+      await clearCart(token);
+      await refreshCart();
+      setMessage("cart_cleared");
+    } catch (error) {
+      setMessage(errorMessage(error));
+    }
   }
 
   return (
