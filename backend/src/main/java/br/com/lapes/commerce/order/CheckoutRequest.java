@@ -1,5 +1,8 @@
 package br.com.lapes.commerce.order;
 
 import jakarta.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-public record CheckoutRequest(@Size(max = 40) String couponCode, Boolean paymentApproved) {}
+public record CheckoutRequest(
+    @Schema(example = "TERMINAL10") @Size(max = 40) String couponCode,
+    @Schema(example = "true", description = "false simula falha de pagamento") Boolean paymentApproved) {}
