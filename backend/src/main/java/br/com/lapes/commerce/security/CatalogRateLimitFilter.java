@@ -1,18 +1,13 @@
 package br.com.lapes.commerce.security;
 
-import br.com.lapes.commerce.common.ApiError;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,16 +15,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Order(2)
 public class CatalogRateLimitFilter extends OncePerRequestFilter {
 
-  private final ConcurrentHashMap<String, Window> windows = new ConcurrentHashMap<>();
-  private final ObjectMapper objectMapper;
+  private final RateLimitService rateLimitService;
+  private final RateLimitResponseWriter responseWriter;
+  private final ClientIpResolver clientIpResolver;
+  private final boolean enabled;
   private final int capacity;
   private final Duration refillWindow;
 
   public CatalogRateLimitFilter(
-      ObjectMapper objectMapper,
+      RateLimitService rateLimitService,
+      RateLimitResponseWriter responseWriter,
+      ClientIpResolver clientIpResolver,
+      @Value("${app.rate-limit.enabled:true}") boolean enabled,
       @Value("${app.rate-limit.catalog.capacity}") int capacity,
       @Value("${app.rate-limit.catalog.refill-window-seconds}") long refillWindowSeconds) {
-    this.objectMapper = objectMapper;
+    this.rateLimitService = rateLimitService;
+    this.responseWriter = responseWriter;
+    this.clientIpResolver = clientIpResolver;
+    this.enabled = enabled;
     this.capacity = capacity;
     this.refillWindow = Duration.ofSeconds(refillWindowSeconds);
   }
@@ -38,19 +41,15 @@ public class CatalogRateLimitFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
-    if (!isCatalogRead(request)) {
+    if (!enabled || !isCatalogRead(request)) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    String key = request.getRemoteAddr() + ":catalog";
-    Window window = windows.compute(key, (ignored, current) -> nextWindow(current));
-    if (window.requests() > capacity) {
-      response.setStatus(429);
-      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-      objectMapper.writeValue(
-          response.getWriter(),
-          ApiError.of(429, "Too Many Requests", "Rate limit exceeded", request.getRequestURI()));
+    String key = clientIpResolver.resolve(request) + ":catalog";
+    RateLimitResult result = rateLimitService.consume("catalog", key, capacity, refillWindow);
+    if (!result.allowed()) {
+      responseWriter.write(request, response, result.retryAfterSeconds());
       return;
     }
 
@@ -61,13 +60,4 @@ public class CatalogRateLimitFilter extends OncePerRequestFilter {
     return "GET".equals(request.getMethod()) && request.getRequestURI().startsWith("/api/products");
   }
 
-  private Window nextWindow(Window current) {
-    Instant now = Instant.now();
-    if (current == null || now.isAfter(current.startedAt().plus(refillWindow))) {
-      return new Window(now, 1);
-    }
-    return new Window(current.startedAt(), current.requests() + 1);
-  }
-
-  private record Window(Instant startedAt, int requests) {}
 }

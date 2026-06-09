@@ -30,6 +30,7 @@ app:
     secret: ${APP_JWT_SECRET:dev-secret-change-me-dev-secret-change-me-dev-secret-change-me}
     expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:120}
   rate-limit:
+    enabled: ${APP_RATE_LIMIT_ENABLED:true}
     auth:
       capacity: ${APP_RATE_LIMIT_AUTH_CAPACITY:10}
       refill-window-seconds: ${APP_RATE_LIMIT_AUTH_REFILL_WINDOW_SECONDS:60}

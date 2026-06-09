@@ -21,6 +21,7 @@ app:
     secret: test-secret-change-me-test-secret-change-me-test-secret-change-me
     expiration-minutes: 120
   rate-limit:
+    enabled: false
     auth:
       capacity: 10
       refill-window-seconds: 60
