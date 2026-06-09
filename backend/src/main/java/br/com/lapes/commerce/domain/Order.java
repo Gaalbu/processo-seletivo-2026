@@ -90,6 +90,10 @@ public class Order {
     this.paymentStatus = PaymentStatus.APPROVED;
   }
 
+  public void markPaymentFailed() {
+    this.paymentStatus = PaymentStatus.FAILED;
+  }
+
   public UUID getId() {
     return id;
   }

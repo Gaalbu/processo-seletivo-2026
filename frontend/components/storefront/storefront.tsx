@@ -68,7 +68,7 @@ export function Storefront() {
     }
   }
 
-  async function finishCheckout(paymentApproved: boolean) {
+  async function finishCheckout(paymentApproved?: boolean) {
     if (!token || user?.role !== "CUSTOMER") {
       setMessage("auth_required: faça login como cliente");
       return;
@@ -77,6 +77,11 @@ export function Storefront() {
     try {
       const order = await checkout(token, couponCode, paymentApproved);
       await refreshCart();
+      if (order.paymentUrl) {
+        setMessage("payment_redirect: abrindo gateway");
+        window.location.href = order.paymentUrl;
+        return;
+      }
       setMessage(`checkout_${order.paymentStatus.toLowerCase()}: ${formatCurrency(order.totalAmount)}`);
     } catch (error) {
       setMessage(errorMessage(error));
@@ -159,7 +164,7 @@ export function Storefront() {
           <Input id="coupon" label="// coupon code" value={couponCode} onChange={(event) => setCouponCode(event.target.value)} />
           <div className={styles.total}>TOTAL {formatCurrency(cart?.subtotal ?? 0)}</div>
           <div className={styles.checkoutActions}>
-            <Button onClick={() => finishCheckout(true)}>checkout success</Button>
+            <Button onClick={() => finishCheckout()}>pay now</Button>
             <Button onClick={() => finishCheckout(false)} variant="ghost">simulate fail</Button>
           </div>
         </aside>

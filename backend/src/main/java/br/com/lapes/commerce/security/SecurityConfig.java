@@ -39,6 +39,7 @@ public class SecurityConfig {
                 auth.requestMatchers(
                         "/api/auth/register",
                         "/api/auth/login",
+                        "/api/payments/mercado-pago/webhook",
                         "/api/health",
                         "/actuator/health",
                         "/api/products",

@@ -1,9 +1,9 @@
 import { apiRequest } from "./client";
 import type { Order, OrderStatus } from "./types";
 
-export function checkout(token: string, couponCode: string, paymentApproved = true) {
+export function checkout(token: string, couponCode: string, paymentApproved?: boolean) {
   return apiRequest<Order>("/checkout", {
-    body: JSON.stringify({ couponCode: couponCode || null, paymentApproved }),
+    body: JSON.stringify({ couponCode: couponCode || null, paymentApproved: paymentApproved ?? null }),
     method: "POST",
     token,
   });

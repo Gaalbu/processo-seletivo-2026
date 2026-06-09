@@ -10,6 +10,8 @@ import br.com.lapes.commerce.order.InvalidCouponException;
 import br.com.lapes.commerce.order.InvalidOrderTransitionException;
 import br.com.lapes.commerce.order.OrderCancellationNotAllowedException;
 import br.com.lapes.commerce.order.OrderNotFoundException;
+import br.com.lapes.commerce.payment.InvalidPaymentWebhookException;
+import br.com.lapes.commerce.payment.PaymentGatewayException;
 import br.com.lapes.commerce.product.ProductNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
@@ -101,6 +103,20 @@ public class GlobalExceptionHandler {
       OrderCancellationNotAllowedException exception, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(ApiError.of(409, "Conflict", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(InvalidPaymentWebhookException.class)
+  public ResponseEntity<ApiError> handleInvalidPaymentWebhook(
+      InvalidPaymentWebhookException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiError.of(401, "Unauthorized", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(PaymentGatewayException.class)
+  public ResponseEntity<ApiError> handlePaymentGateway(
+      PaymentGatewayException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+        .body(ApiError.of(502, "Bad Gateway", exception.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(Exception.class)

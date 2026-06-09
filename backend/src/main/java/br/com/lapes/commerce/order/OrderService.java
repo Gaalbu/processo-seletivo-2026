@@ -11,8 +11,13 @@ import br.com.lapes.commerce.domain.Order;
 import br.com.lapes.commerce.domain.OrderItem;
 import br.com.lapes.commerce.domain.OrderStatus;
 import br.com.lapes.commerce.domain.PaymentStatus;
+import br.com.lapes.commerce.domain.PaymentTransaction;
 import br.com.lapes.commerce.domain.Product;
 import br.com.lapes.commerce.domain.User;
+import br.com.lapes.commerce.payment.PaymentGateway;
+import br.com.lapes.commerce.payment.PaymentGatewayRequest;
+import br.com.lapes.commerce.payment.PaymentGatewayResult;
+import br.com.lapes.commerce.payment.PaymentGatewayStatus;
 import br.com.lapes.commerce.product.ProductNotFoundException;
 import br.com.lapes.commerce.repository.CartItemRepository;
 import br.com.lapes.commerce.repository.CartRepository;
@@ -20,6 +25,7 @@ import br.com.lapes.commerce.repository.CouponRepository;
 import br.com.lapes.commerce.repository.CouponUsageRepository;
 import br.com.lapes.commerce.repository.OrderItemRepository;
 import br.com.lapes.commerce.repository.OrderRepository;
+import br.com.lapes.commerce.repository.PaymentTransactionRepository;
 import br.com.lapes.commerce.repository.ProductRepository;
 import br.com.lapes.commerce.repository.UserRepository;
 import java.math.BigDecimal;
@@ -27,6 +33,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -41,8 +48,10 @@ public class OrderService {
   private final CouponUsageRepository couponUsageRepository;
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
+  private final PaymentTransactionRepository paymentTransactionRepository;
   private final ProductRepository productRepository;
   private final UserRepository userRepository;
+  private final PaymentGateway paymentGateway;
 
   public OrderService(
       CartRepository cartRepository,
@@ -51,16 +60,20 @@ public class OrderService {
       CouponUsageRepository couponUsageRepository,
       OrderRepository orderRepository,
       OrderItemRepository orderItemRepository,
+      PaymentTransactionRepository paymentTransactionRepository,
       ProductRepository productRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      PaymentGateway paymentGateway) {
     this.cartRepository = cartRepository;
     this.cartItemRepository = cartItemRepository;
     this.couponRepository = couponRepository;
     this.couponUsageRepository = couponUsageRepository;
     this.orderRepository = orderRepository;
     this.orderItemRepository = orderItemRepository;
+    this.paymentTransactionRepository = paymentTransactionRepository;
     this.productRepository = productRepository;
     this.userRepository = userRepository;
+    this.paymentGateway = paymentGateway;
   }
 
   @Transactional
@@ -95,14 +108,6 @@ public class OrderService {
     Coupon coupon = resolveCoupon(request.couponCode(), userId, subtotal);
     BigDecimal discount = calculateDiscount(coupon, subtotal);
     BigDecimal total = subtotal.subtract(discount).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
-    boolean paymentApproved = request.paymentApproved() == null || request.paymentApproved();
-
-    if (paymentApproved) {
-      for (int index = 0; index < cartItems.size(); index++) {
-        lockedProducts.get(index).reserveStock(cartItems.get(index).getQuantity());
-      }
-    }
-
     Order order =
         orderRepository.save(
             Order.create(
@@ -111,7 +116,7 @@ public class OrderService {
                 subtotal.setScale(2, RoundingMode.HALF_UP),
                 discount,
                 total,
-                paymentApproved ? PaymentStatus.APPROVED : PaymentStatus.FAILED));
+                PaymentStatus.PENDING));
 
     List<OrderItem> orderItems = new ArrayList<>();
     for (int index = 0; index < cartItems.size(); index++) {
@@ -119,14 +124,63 @@ public class OrderService {
     }
     orderItemRepository.saveAll(orderItems);
 
-    if (paymentApproved) {
-      if (coupon != null) {
-        couponUsageRepository.save(CouponUsage.create(coupon, user, order));
-      }
+    String idempotencyKey = "order-" + order.getId();
+    PaymentGatewayResult payment =
+        paymentGateway.createPayment(
+            new PaymentGatewayRequest(
+                order.getId(),
+                total,
+                "LAPES Commerce order " + order.getId(),
+                user.getEmail(),
+                idempotencyKey,
+                request.paymentApproved()));
+    paymentTransactionRepository.save(
+        PaymentTransaction.create(
+            order,
+            paymentGateway.provider(),
+            payment.providerPaymentId(),
+            payment.status(),
+            total,
+            payment.checkoutUrl(),
+            idempotencyKey,
+            payment.rawPayload()));
+
+    if (payment.status() == PaymentStatus.APPROVED) {
+      markPendingOrderAsPaid(order);
       cartItemRepository.deleteByCartId(cart.getId());
+    } else if (payment.status() == PaymentStatus.FAILED) {
+      order.markPaymentFailed();
     }
 
-    return toResponse(order);
+    return toResponse(order, payment.checkoutUrl());
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = {"products:list", "products:detail"}, allEntries = true)
+  public void syncPayment(String providerPaymentId) {
+    PaymentGatewayStatus status = paymentGateway.fetchPaymentStatus(providerPaymentId);
+    Optional<PaymentTransaction> transactionByProviderId =
+        paymentTransactionRepository.findByProviderAndProviderPaymentId(paymentGateway.provider(), providerPaymentId);
+    PaymentTransaction transaction =
+        transactionByProviderId.orElseGet(() -> findTransactionByExternalReference(status.externalReference()));
+
+    if (!transaction.getProviderPaymentId().equals(providerPaymentId)) {
+      transaction.updateProviderPaymentId(providerPaymentId);
+    }
+    if (transaction.getStatus() == status.status()) {
+      return;
+    }
+
+    Order order = transaction.getOrder();
+    if (status.status() == PaymentStatus.APPROVED) {
+      if (order.getStatus() != OrderStatus.PAID) {
+        markPendingOrderAsPaid(order);
+        cartRepository.findByUserId(order.getUser().getId()).ifPresent(cart -> cartItemRepository.deleteByCartId(cart.getId()));
+      }
+    } else if (status.status() == PaymentStatus.FAILED) {
+      order.markPaymentFailed();
+    }
+    transaction.updateStatus(status.status(), status.rawPayload());
   }
 
   @Transactional(readOnly = true)
@@ -173,6 +227,9 @@ public class OrderService {
   }
 
   private void markPendingOrderAsPaid(Order order) {
+    if (order.getStatus() == OrderStatus.PAID) {
+      return;
+    }
     for (OrderItem item : orderItemRepository.findByOrderId(order.getId())) {
       Product product =
           productRepository
@@ -249,8 +306,26 @@ public class OrderService {
   }
 
   private OrderResponse toResponse(Order order) {
+    return toResponse(order, null);
+  }
+
+  private OrderResponse toResponse(Order order, String paymentUrl) {
     List<OrderItemResponse> items =
         orderItemRepository.findByOrderId(order.getId()).stream().map(OrderItemResponse::from).toList();
-    return OrderResponse.from(order, items);
+    return OrderResponse.from(order, items, paymentUrl);
+  }
+
+  private PaymentTransaction findTransactionByExternalReference(String externalReference) {
+    if (externalReference == null || externalReference.isBlank()) {
+      throw new OrderNotFoundException();
+    }
+    try {
+      UUID orderId = UUID.fromString(externalReference);
+      return paymentTransactionRepository.findByOrderIdOrderByCreatedAtDesc(orderId).stream()
+          .findFirst()
+          .orElseThrow(OrderNotFoundException::new);
+    } catch (IllegalArgumentException exception) {
+      throw new OrderNotFoundException();
+    }
   }
 }

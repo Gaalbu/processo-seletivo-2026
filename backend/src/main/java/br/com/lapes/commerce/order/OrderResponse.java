@@ -16,10 +16,15 @@ public record OrderResponse(
     BigDecimal subtotalAmount,
     BigDecimal discountAmount,
     BigDecimal totalAmount,
+    String paymentUrl,
     Instant createdAt,
     List<OrderItemResponse> items) {
 
   public static OrderResponse from(Order order, List<OrderItemResponse> items) {
+    return from(order, items, null);
+  }
+
+  public static OrderResponse from(Order order, List<OrderItemResponse> items, String paymentUrl) {
     return new OrderResponse(
         order.getId(),
         order.getStatus(),
@@ -28,6 +33,7 @@ public record OrderResponse(
         order.getSubtotalAmount(),
         order.getDiscountAmount(),
         order.getTotalAmount(),
+        paymentUrl,
         order.getCreatedAt(),
         items);
   }

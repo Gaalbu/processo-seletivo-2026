@@ -36,6 +36,14 @@ app:
     catalog:
       capacity: ${APP_RATE_LIMIT_CATALOG_CAPACITY:60}
       refill-window-seconds: ${APP_RATE_LIMIT_CATALOG_REFILL_WINDOW_SECONDS:60}
+  payment:
+    notification-url: ${APP_PAYMENT_NOTIFICATION_URL:http://localhost:8080/api/payments/mercado-pago/webhook}
+    success-url: ${APP_PAYMENT_SUCCESS_URL:http://localhost:3000/orders}
+    failure-url: ${APP_PAYMENT_FAILURE_URL:http://localhost:3000/orders}
+    pending-url: ${APP_PAYMENT_PENDING_URL:http://localhost:3000/orders}
+    webhook-secret: ${APP_PAYMENT_WEBHOOK_SECRET:}
+    mercado-pago:
+      access-token: ${APP_PAYMENT_MERCADO_PAGO_ACCESS_TOKEN:}
 
 springdoc:
   swagger-ui:

@@ -89,6 +89,12 @@ APP_RATE_LIMIT_AUTH_CAPACITY=10
 APP_RATE_LIMIT_AUTH_REFILL_WINDOW_SECONDS=60
 APP_RATE_LIMIT_CATALOG_CAPACITY=60
 APP_RATE_LIMIT_CATALOG_REFILL_WINDOW_SECONDS=60
+APP_PAYMENT_MERCADO_PAGO_ACCESS_TOKEN=
+APP_PAYMENT_WEBHOOK_SECRET=
+APP_PAYMENT_NOTIFICATION_URL=http://localhost:8080/api/payments/mercado-pago/webhook
+APP_PAYMENT_SUCCESS_URL=http://localhost:3000/orders
+APP_PAYMENT_FAILURE_URL=http://localhost:3000/orders
+APP_PAYMENT_PENDING_URL=http://localhost:3000/orders
 ```
 
 Frontend, exemplo em `frontend/.env.example`:
@@ -172,11 +178,25 @@ Checkout e pedidos:
 - `GET /api/admin/orders`, restrito a `ADMIN`
 - `PUT /api/admin/orders/{id}/status`, restrito a `ADMIN`
 - `POST /api/admin/orders/{id}/cancel`, restrito a `ADMIN`
+- `POST /api/payments/mercado-pago/webhook`, webhook publico validado por assinatura quando configurada.
 
 Checkout aceita:
 
 - `couponCode`: codigo opcional de cupom.
-- `paymentApproved`: `true` ou omitido simula pagamento aprovado; `false` simula falha de pagamento.
+- `paymentApproved`: usado apenas no provider fake local/CI; em Mercado Pago real o pagamento e confirmado por webhook.
+
+## Pagamentos
+
+O checkout possui integracao opcional com Mercado Pago Checkout Pro.
+
+- Sem `APP_PAYMENT_MERCADO_PAGO_ACCESS_TOKEN`, o backend usa provider fake deterministico para demo local e CI.
+- Com `APP_PAYMENT_MERCADO_PAGO_ACCESS_TOKEN`, `POST /api/checkout` cria uma preferencia real no Mercado Pago e retorna `paymentUrl`.
+- O frontend redireciona o cliente para o `paymentUrl`.
+- O endpoint `/api/payments/mercado-pago/webhook` consulta o pagamento no Mercado Pago, reconcilia pelo `external_reference` do pedido e atualiza `paymentStatus` de forma idempotente.
+- Quando aprovado, o backend reserva estoque, registra uso do cupom e limpa o carrinho.
+- Quando rejeitado/cancelado, o pedido permanece com pagamento falho sem reservar estoque.
+
+Para testar webhook local, exponha a API com uma URL publica temporaria e configure `APP_PAYMENT_NOTIFICATION_URL` no backend e no painel/app do Mercado Pago.
 
 ## Testes
 
@@ -255,6 +275,7 @@ Cada request gera um log JSON no backend com o formato:
 - Estados de pedido: implementado.
 - Cancelamento antes de envio com devolucao de estoque: implementado.
 - Simulacao de pagamento: implementado.
+- Gateway real de pagamento: implementado com Mercado Pago Checkout Pro e fallback fake para CI.
 - Cupons percentual/fixo, expiracao, uso unico e minimo: implementado.
 - Validacao de input: implementado com Bean Validation.
 - Erros padronizados: implementado.

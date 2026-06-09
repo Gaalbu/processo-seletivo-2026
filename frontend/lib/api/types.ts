@@ -68,6 +68,7 @@ export type Order = {
   subtotalAmount: number;
   discountAmount: number;
   totalAmount: number;
+  paymentUrl: string | null;
   createdAt: string;
   items: OrderItem[];
 };

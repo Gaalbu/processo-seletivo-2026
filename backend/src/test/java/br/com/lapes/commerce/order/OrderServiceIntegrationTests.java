@@ -169,6 +169,7 @@ class OrderServiceIntegrationTests {
   }
 
   private void cleanDatabase() {
+    jdbcTemplate.update("delete from payment_transactions");
     jdbcTemplate.update("delete from coupon_usages");
     jdbcTemplate.update("delete from order_items");
     jdbcTemplate.update("delete from orders");
