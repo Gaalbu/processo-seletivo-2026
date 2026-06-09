@@ -1,13 +1,76 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: lapes-commerce-caddy
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+    container_name: lapes-commerce-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+    expose:
+      - "3000"
+
+  backend:
+    build:
+      context: ./backend
+    container_name: lapes-commerce-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-lapes_commerce}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-lapes}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-lapes}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-dev-secret-change-me-dev-secret-change-me-dev-secret-change-me}
+      APP_JWT_EXPIRATION_MINUTES: ${APP_JWT_EXPIRATION_MINUTES:-120}
+      APP_RATE_LIMIT_AUTH_CAPACITY: ${APP_RATE_LIMIT_AUTH_CAPACITY:-10}
+      APP_RATE_LIMIT_AUTH_REFILL_WINDOW_SECONDS: ${APP_RATE_LIMIT_AUTH_REFILL_WINDOW_SECONDS:-60}
+      APP_RATE_LIMIT_CATALOG_CAPACITY: ${APP_RATE_LIMIT_CATALOG_CAPACITY:-60}
+      APP_RATE_LIMIT_CATALOG_REFILL_WINDOW_SECONDS: ${APP_RATE_LIMIT_CATALOG_REFILL_WINDOW_SECONDS:-60}
+      APP_PAYMENT_MERCADO_PAGO_ACCESS_TOKEN: ${APP_PAYMENT_MERCADO_PAGO_ACCESS_TOKEN:-}
+      APP_PAYMENT_WEBHOOK_SECRET: ${APP_PAYMENT_WEBHOOK_SECRET:-}
+      APP_PAYMENT_NOTIFICATION_URL: ${APP_PAYMENT_NOTIFICATION_URL:-${APP_PUBLIC_URL:-http://localhost}/api/payments/mercado-pago/webhook}
+      APP_PAYMENT_SUCCESS_URL: ${APP_PAYMENT_SUCCESS_URL:-${APP_PUBLIC_URL:-http://localhost}/orders}
+      APP_PAYMENT_FAILURE_URL: ${APP_PAYMENT_FAILURE_URL:-${APP_PUBLIC_URL:-http://localhost}/orders}
+      APP_PAYMENT_PENDING_URL: ${APP_PAYMENT_PENDING_URL:-${APP_PUBLIC_URL:-http://localhost}/orders}
+    expose:
+      - "8080"
+
   postgres:
     image: postgres:16-alpine
     container_name: lapes-commerce-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: lapes_commerce
-      POSTGRES_USER: lapes
-      POSTGRES_PASSWORD: lapes
+      POSTGRES_DB: ${POSTGRES_DB:-lapes_commerce}
+      POSTGRES_USER: ${POSTGRES_USER:-lapes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lapes}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,8 +82,9 @@ services:
   redis:
     image: redis:7-alpine
     container_name: lapes-commerce-redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -32,3 +96,5 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  caddy_data:
+  caddy_config:
