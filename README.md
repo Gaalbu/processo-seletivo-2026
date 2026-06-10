@@ -12,7 +12,7 @@ O projeto implementa API backend e interface web para autenticacao, catalogo de 
 
 ## Stack
 
-- Backend: Java 21, Spring Boot 3, Maven
+- Backend: Java 17, Spring Boot 3, Maven
 - Frontend: Next.js, React, TypeScript
 - Banco de dados: PostgreSQL
 - Cache externo: Redis
@@ -34,7 +34,7 @@ dev/       Enunciado e referencia visual do desafio
 
 Requisitos:
 
-- Java 21+
+- Java 17+
 - Maven 3.9+
 - Node.js 22+
 - npm

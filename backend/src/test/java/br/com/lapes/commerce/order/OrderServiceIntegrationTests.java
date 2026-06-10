@@ -61,7 +61,7 @@ class OrderServiceIntegrationTests {
     assertThat(response.discountAmount()).isEqualByComparingTo("0.00");
     assertThat(response.totalAmount()).isEqualByComparingTo("200.00");
     assertThat(response.items()).hasSize(1);
-    assertThat(response.items().getFirst().unitPrice()).isEqualByComparingTo("100.00");
+    assertThat(response.items().get(0).unitPrice()).isEqualByComparingTo("100.00");
     assertThat(productRepository.findById(PRODUCT_1).orElseThrow().getStock()).isEqualTo(3);
     assertThat(cartItemRepository.findByCartIdOrderByCreatedAtAsc(CART_1)).isEmpty();
   }
