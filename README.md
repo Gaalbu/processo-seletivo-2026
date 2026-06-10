@@ -43,7 +43,7 @@ Requisitos:
 Subir infraestrutura local:
 
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
 Servicos:
@@ -68,7 +68,7 @@ npm run dev
 
 URLs:
 
-- Web: `http://localhost:3000`
+- Web: `http://localhost`
 - API health: `http://localhost:8080/api/health`
 - Actuator health: `http://localhost:8080/actuator/health`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
