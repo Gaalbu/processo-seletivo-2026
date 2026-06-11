@@ -6,6 +6,7 @@ import br.com.lapes.commerce.cart.CartItemNotFoundException;
 import br.com.lapes.commerce.cart.CartNotFoundException;
 import br.com.lapes.commerce.cart.InsufficientStockException;
 import br.com.lapes.commerce.order.EmptyCartException;
+import br.com.lapes.commerce.order.IdempotencyConflictException;
 import br.com.lapes.commerce.order.InvalidCouponException;
 import br.com.lapes.commerce.order.InvalidOrderTransitionException;
 import br.com.lapes.commerce.order.OrderCancellationNotAllowedException;
@@ -96,6 +97,13 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleBusinessRule(RuntimeException exception, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
         .body(ApiError.of(422, "Unprocessable Entity", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(IdempotencyConflictException.class)
+  public ResponseEntity<ApiError> handleIdempotencyConflict(
+      IdempotencyConflictException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ApiError.of(409, "Conflict", exception.getMessage(), request.getRequestURI()));
   }
 
   @ExceptionHandler(OrderCancellationNotAllowedException.class)

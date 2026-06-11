@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,8 +85,19 @@ public class OrderService {
   @Transactional
   @CacheEvict(cacheNames = {"products:list", "products:detail"}, allEntries = true)
   public OrderResponse checkout(UUID userId, CheckoutRequest request) {
+    if (request.idempotencyKey() != null && !request.idempotencyKey().isBlank()) {
+      Optional<PaymentTransaction> existing =
+          paymentTransactionRepository.findByIdempotencyKey(request.idempotencyKey());
+      if (existing.isPresent()) {
+        Order existingOrder = existing.get().getOrder();
+        if (!existingOrder.getUser().getId().equals(userId)) {
+          throw new IdempotencyConflictException();
+        }
+        return toResponse(existingOrder);
+      }
+    }
+
     User user = userRepository.findById(userId).orElseThrow();
-    Cart cart = cartRepository.findByUserId(userId).orElseThrow(CartNotFoundException::new);
     List<CartItem> cartItems = cartItemRepository.findByCartIdOrderByCreatedAtAsc(cart.getId());
     if (cartItems.isEmpty()) {
       throw new EmptyCartException();
@@ -132,7 +144,9 @@ public class OrderService {
     }
     orderItemRepository.saveAll(orderItems);
 
-    String idempotencyKey = "order-" + order.getId();
+    String idempotencyKey = request.idempotencyKey() != null && !request.idempotencyKey().isBlank()
+        ? request.idempotencyKey()
+        : "order-" + order.getId();
     PaymentGatewayResult payment =
         paymentGateway.createPayment(
             new PaymentGatewayRequest(
@@ -142,16 +156,23 @@ public class OrderService {
                 user.getEmail(),
                 idempotencyKey,
                 request.paymentApproved()));
-    paymentTransactionRepository.save(
-        PaymentTransaction.create(
-            order,
-            paymentGateway.provider(),
-            payment.providerPaymentId(),
-            payment.status(),
-            total,
-            payment.checkoutUrl(),
-            idempotencyKey,
-            payment.rawPayload()));
+    try {
+      paymentTransactionRepository.save(
+          PaymentTransaction.create(
+              order,
+              paymentGateway.provider(),
+              payment.providerPaymentId(),
+              payment.status(),
+              total,
+              payment.checkoutUrl(),
+              idempotencyKey,
+              payment.rawPayload()));
+    } catch (DataIntegrityViolationException exception) {
+      PaymentTransaction existing =
+          paymentTransactionRepository.findByIdempotencyKey(idempotencyKey)
+              .orElseThrow(() -> exception);
+      return toResponse(existing.getOrder());
+    }
 
     if (payment.status() == PaymentStatus.APPROVED) {
       markPendingOrderAsPaid(order);
