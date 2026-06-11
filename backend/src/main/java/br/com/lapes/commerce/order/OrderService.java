@@ -10,6 +10,7 @@ import br.com.lapes.commerce.domain.CouponUsage;
 import br.com.lapes.commerce.domain.Order;
 import br.com.lapes.commerce.domain.OrderItem;
 import br.com.lapes.commerce.domain.OrderStatus;
+import br.com.lapes.commerce.domain.OrderStatusHistory;
 import br.com.lapes.commerce.domain.PaymentStatus;
 import br.com.lapes.commerce.domain.PaymentTransaction;
 import br.com.lapes.commerce.domain.Product;
@@ -25,6 +26,7 @@ import br.com.lapes.commerce.repository.CouponRepository;
 import br.com.lapes.commerce.repository.CouponUsageRepository;
 import br.com.lapes.commerce.repository.OrderItemRepository;
 import br.com.lapes.commerce.repository.OrderRepository;
+import br.com.lapes.commerce.repository.OrderStatusHistoryRepository;
 import br.com.lapes.commerce.repository.PaymentTransactionRepository;
 import br.com.lapes.commerce.repository.ProductRepository;
 import br.com.lapes.commerce.repository.UserRepository;
@@ -51,6 +53,7 @@ public class OrderService {
   private final PaymentTransactionRepository paymentTransactionRepository;
   private final ProductRepository productRepository;
   private final UserRepository userRepository;
+  private final OrderStatusHistoryRepository orderStatusHistoryRepository;
   private final PaymentGateway paymentGateway;
 
   public OrderService(
@@ -63,6 +66,7 @@ public class OrderService {
       PaymentTransactionRepository paymentTransactionRepository,
       ProductRepository productRepository,
       UserRepository userRepository,
+      OrderStatusHistoryRepository orderStatusHistoryRepository,
       PaymentGateway paymentGateway) {
     this.cartRepository = cartRepository;
     this.cartItemRepository = cartItemRepository;
@@ -73,6 +77,7 @@ public class OrderService {
     this.paymentTransactionRepository = paymentTransactionRepository;
     this.productRepository = productRepository;
     this.userRepository = userRepository;
+    this.orderStatusHistoryRepository = orderStatusHistoryRepository;
     this.paymentGateway = paymentGateway;
   }
 
@@ -117,6 +122,9 @@ public class OrderService {
                 discount,
                 total,
                 PaymentStatus.PENDING));
+
+    orderStatusHistoryRepository.save(
+        OrderStatusHistory.record(order, null, order.getStatus(), user.getEmail()));
 
     List<OrderItem> orderItems = new ArrayList<>();
     for (int index = 0; index < cartItems.size(); index++) {
@@ -215,13 +223,16 @@ public class OrderService {
   @CacheEvict(cacheNames = {"products:list", "products:detail"}, allEntries = true)
   public OrderResponse updateStatus(UUID orderId, OrderStatus nextStatus) {
     Order order = orderRepository.findById(orderId).orElseThrow(OrderNotFoundException::new);
-    if (!isValidTransition(order.getStatus(), nextStatus)) {
+    OrderStatus previous = order.getStatus();
+    if (!isValidTransition(previous, nextStatus)) {
       throw new InvalidOrderTransitionException();
     }
-    if (order.getStatus() == OrderStatus.PENDING && nextStatus == OrderStatus.PAID) {
+    if (previous == OrderStatus.PENDING && nextStatus == OrderStatus.PAID) {
       markPendingOrderAsPaid(order);
     } else {
       order.updateStatus(nextStatus);
+      orderStatusHistoryRepository.save(
+          OrderStatusHistory.record(order, previous, nextStatus, "SYSTEM"));
     }
     return toResponse(order);
   }
@@ -245,7 +256,10 @@ public class OrderService {
             order.getCoupon().getId(), order.getUser().getId())) {
       throw new InvalidCouponException("Coupon was already used by this user");
     }
+    OrderStatus previous = order.getStatus();
     order.markPaid();
+    orderStatusHistoryRepository.save(
+        OrderStatusHistory.record(order, previous, OrderStatus.PAID, order.getUser().getEmail()));
     if (order.getCoupon() != null) {
       couponUsageRepository.save(CouponUsage.create(order.getCoupon(), order.getUser(), order));
     }
@@ -261,7 +275,10 @@ public class OrderService {
         product.returnStock(item.getQuantity());
       }
     }
+    OrderStatus previous = order.getStatus();
     order.cancel();
+    orderStatusHistoryRepository.save(
+        OrderStatusHistory.record(order, previous, OrderStatus.CANCELLED, order.getUser().getEmail()));
     return toResponse(order);
   }
 
