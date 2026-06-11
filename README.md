@@ -71,7 +71,9 @@ O frontend fica em `http://localhost:3000` e faz proxy de `/api` para o backend.
 URLs:
 
 - Web: `http://localhost`
-- API health: `http://localhost:8080/api/health`
+- API health: `http://localhost:8080/api/v1/health`
+
+  
 - Actuator health: `http://localhost:8080/actuator/health`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 

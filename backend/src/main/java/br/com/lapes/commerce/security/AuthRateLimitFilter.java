@@ -58,8 +58,8 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
 
   private boolean isAuthWrite(HttpServletRequest request) {
     return "POST".equals(request.getMethod())
-        && ("/api/auth/login".equals(request.getRequestURI())
-            || "/api/auth/register".equals(request.getRequestURI()));
+        && ("/api/v1/auth/login".equals(request.getRequestURI())
+            || "/api/v1/auth/register".equals(request.getRequestURI()));
   }
 
 }
