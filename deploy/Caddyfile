@@ -7,6 +7,14 @@ http://{$APP_DOMAIN:localhost} {
     X-Frame-Options DENY
   }
 
+  rate_limit {
+    zone dynamic {
+      key {remote_host}
+      events 10
+      window 1m
+    }
+  }
+
   handle /api/* {
     reverse_proxy backend:8080
   }
