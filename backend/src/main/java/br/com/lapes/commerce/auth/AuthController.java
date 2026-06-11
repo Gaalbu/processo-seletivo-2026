@@ -1,7 +1,9 @@
 package br.com.lapes.commerce.auth;
 
 import br.com.lapes.commerce.security.AuthenticatedUser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -17,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
+  private final TokenBlacklist tokenBlacklist;
 
-  public AuthController(AuthService authService) {
+  public AuthController(AuthService authService, TokenBlacklist tokenBlacklist) {
     this.authService = authService;
+    this.tokenBlacklist = tokenBlacklist;
   }
 
   @PostMapping("/register")
@@ -31,6 +35,17 @@ public class AuthController {
   @PostMapping("/login")
   public AuthResponse login(@Valid @RequestBody LoginRequest request) {
     return authService.login(request);
+  }
+
+  @PostMapping("/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @SecurityRequirement(name = "bearerAuth")
+  public void logout(HttpServletRequest request) {
+    String authorization = request.getHeader("Authorization");
+    if (authorization != null && authorization.startsWith("Bearer ")) {
+      String token = authorization.substring(7);
+      tokenBlacklist.invalidate(token, Duration.ofHours(2));
+    }
   }
 
   @GetMapping("/me")

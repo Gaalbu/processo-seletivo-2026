@@ -1,5 +1,6 @@
 package br.com.lapes.commerce.security;
 
+import br.com.lapes.commerce.auth.TokenBlacklist;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,10 +19,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserPrincipalService userPrincipalService;
+  private final TokenBlacklist tokenBlacklist;
 
-  public JwtAuthenticationFilter(JwtService jwtService, UserPrincipalService userPrincipalService) {
+  public JwtAuthenticationFilter(
+      JwtService jwtService,
+      UserPrincipalService userPrincipalService,
+      TokenBlacklist tokenBlacklist) {
     this.jwtService = jwtService;
     this.userPrincipalService = userPrincipalService;
+    this.tokenBlacklist = tokenBlacklist;
   }
 
   @Override
@@ -35,6 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     String token = authorization.substring(7);
+
+    if (tokenBlacklist.isInvalid(token)) {
+      SecurityContextHolder.clearContext();
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     String email;
     try {
       email = jwtService.extractSubject(token);
