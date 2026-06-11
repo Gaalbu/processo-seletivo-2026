@@ -273,7 +273,7 @@ public class OrderService {
       product.reserveStock(item.getQuantity());
     }
     if (order.getCoupon() != null
-        && couponUsageRepository.existsByCouponIdAndUserId(
+        && couponUsageRepository.existsByCouponIdAndUserIdAndCancelledAtIsNull(
             order.getCoupon().getId(), order.getUser().getId())) {
       throw new InvalidCouponException("Coupon was already used by this user");
     }
@@ -296,6 +296,12 @@ public class OrderService {
         product.returnStock(item.getQuantity());
       }
     }
+    if (order.getCoupon() != null) {
+      couponUsageRepository
+          .findByCouponIdAndUserIdAndOrderId(
+              order.getCoupon().getId(), order.getUser().getId(), order.getId())
+          .ifPresent(CouponUsage::cancel);
+    }
     OrderStatus previous = order.getStatus();
     order.cancel();
     orderStatusHistoryRepository.save(
@@ -317,7 +323,7 @@ public class OrderService {
     if (subtotal.compareTo(coupon.getMinimumOrderAmount()) < 0) {
       throw new InvalidCouponException("Order minimum amount was not reached for this coupon");
     }
-    if (couponUsageRepository.existsByCouponIdAndUserId(coupon.getId(), userId)) {
+    if (couponUsageRepository.existsByCouponIdAndUserIdAndCancelledAtIsNull(coupon.getId(), userId)) {
       throw new InvalidCouponException("Coupon was already used by this user");
     }
     return coupon;
