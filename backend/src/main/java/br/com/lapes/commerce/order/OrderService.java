@@ -293,8 +293,7 @@ public class OrderService {
     }
     if (order.getStatus() == OrderStatus.PAID) {
       for (OrderItem item : orderItemRepository.findByOrderId(order.getId())) {
-        Product product = productRepository.findByIdForUpdate(item.getProduct().getId()).orElseThrow();
-        product.returnStock(item.getQuantity());
+        productRepository.incrementStock(item.getProduct().getId(), item.getQuantity());
       }
     }
     if (order.getCoupon() != null) {

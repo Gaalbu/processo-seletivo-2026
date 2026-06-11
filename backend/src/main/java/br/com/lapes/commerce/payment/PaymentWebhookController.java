@@ -2,6 +2,8 @@ package br.com.lapes.commerce.payment;
 
 import br.com.lapes.commerce.order.OrderService;
 import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/payments")
+@Tag(name = "Payment Webhook", description = "Payment gateway webhook integration")
 public class PaymentWebhookController {
 
   private final OrderService orderService;
@@ -22,6 +25,7 @@ public class PaymentWebhookController {
     this.webhookVerifier = webhookVerifier;
   }
 
+  @Operation(summary = "Receive Mercado Pago webhook notification")
   @PostMapping("/mercado-pago/webhook")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void mercadoPagoWebhook(

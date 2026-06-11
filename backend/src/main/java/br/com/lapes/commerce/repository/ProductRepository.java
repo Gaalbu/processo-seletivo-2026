@@ -8,7 +8,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
 
@@ -22,4 +24,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
 
   @Query("select p.deletedAt from Product p where p.id = :id")
   Instant findDeletedAtById(UUID id);
+
+  @Modifying
+  @Query("UPDATE Product p SET p.stock = p.stock + :quantity WHERE p.id = :id AND p.stock + :quantity >= 0")
+  int incrementStock(@Param("id") UUID id, @Param("quantity") int quantity);
 }

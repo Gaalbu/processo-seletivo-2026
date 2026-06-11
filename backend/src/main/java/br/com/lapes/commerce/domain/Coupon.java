@@ -50,6 +50,17 @@ public class Coupon {
 
   protected Coupon() {}
 
+  public static Coupon create(String code, CouponType type, BigDecimal value, BigDecimal minimumOrderAmount, Instant expiresAt, boolean active) {
+    Coupon coupon = new Coupon();
+    coupon.code = code;
+    coupon.type = type;
+    coupon.value = value;
+    coupon.minimumOrderAmount = minimumOrderAmount;
+    coupon.expiresAt = expiresAt;
+    coupon.active = active;
+    return coupon;
+  }
+
   public UUID getId() {
     return id;
   }

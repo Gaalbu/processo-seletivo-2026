@@ -14,6 +14,7 @@ import br.com.lapes.commerce.order.OrderNotFoundException;
 import br.com.lapes.commerce.payment.InvalidPaymentWebhookException;
 import br.com.lapes.commerce.payment.PaymentGatewayException;
 import br.com.lapes.commerce.product.ProductNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -75,6 +76,13 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler({CartNotFoundException.class, CartItemNotFoundException.class})
   public ResponseEntity<ApiError> handleCartNotFound(RuntimeException exception, HttpServletRequest request) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
+  }
+
+  @ExceptionHandler(EntityNotFoundException.class)
+  public ResponseEntity<ApiError> handleEntityNotFound(
+      EntityNotFoundException exception, HttpServletRequest request) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(ApiError.of(404, "Not Found", exception.getMessage(), request.getRequestURI()));
   }
