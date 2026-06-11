@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/v1/cart")
 @PreAuthorize("hasRole('CUSTOMER')")
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Cart", description = "Authenticated customer shopping cart")

@@ -47,18 +47,18 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
-                        "/api/auth/register",
-                        "/api/auth/login",
-                        "/api/payments/mercado-pago/webhook",
-                        "/api/health",
+                        "/api/v1/auth/register",
+                        "/api/v1/auth/login",
+                        "/api/v1/payments/mercado-pago/webhook",
+                        "/api/v1/health",
                         "/actuator/health",
-                        "/api/products",
-                        "/api/products/*",
+                        "/api/v1/products",
+                        "/api/v1/products/*",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html")
                     .permitAll()
-                    .requestMatchers("/api/admin/**")
+                    .requestMatchers("/api/v1/admin/**")
                     .hasRole(UserRole.ADMIN.name())
                     .anyRequest()
                     .authenticated())

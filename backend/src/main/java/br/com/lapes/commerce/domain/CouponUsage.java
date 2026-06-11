@@ -36,7 +36,18 @@ public class CouponUsage {
   @Column(name = "used_at", nullable = false, updatable = false)
   private Instant usedAt;
 
+  @Column(name = "cancelled_at")
+  private Instant cancelledAt;
+
   protected CouponUsage() {}
+
+  public void cancel() {
+    this.cancelledAt = Instant.now();
+  }
+
+  public boolean isCancelled() {
+    return cancelledAt != null;
+  }
 
   public static CouponUsage create(Coupon coupon, User user, Order order) {
     CouponUsage usage = new CouponUsage();

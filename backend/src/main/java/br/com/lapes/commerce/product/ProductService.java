@@ -79,6 +79,14 @@ public class ProductService {
 
   @Transactional
   @CacheEvict(cacheNames = {"products:list", "products:detail"}, allEntries = true)
+  public ProductResponse updateStock(UUID id, StockRequest request) {
+    Product product = activeProduct(id);
+    product.adjustStock(request.quantity());
+    return ProductResponse.from(productRepository.save(product));
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = {"products:list", "products:detail"}, allEntries = true)
   public void delete(UUID id) {
     activeProduct(id).softDelete();
   }

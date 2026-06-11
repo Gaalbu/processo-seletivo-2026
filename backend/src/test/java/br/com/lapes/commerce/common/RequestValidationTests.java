@@ -19,7 +19,7 @@ class RequestValidationTests {
   @Test
   void invalidQueryParameterReturnsBadRequest() throws Exception {
     mockMvc
-        .perform(get("/api/products").param("page", "abc"))
+        .perform(get("/api/v1/products").param("page", "abc"))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status").value(400));
   }

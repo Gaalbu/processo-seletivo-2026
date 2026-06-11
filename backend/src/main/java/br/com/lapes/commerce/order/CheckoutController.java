@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/checkout")
+@RequestMapping("/api/v1/checkout")
 @PreAuthorize("hasRole('CUSTOMER')")
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Checkout", description = "Checkout and payment simulation")

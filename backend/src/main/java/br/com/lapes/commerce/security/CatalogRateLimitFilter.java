@@ -57,7 +57,7 @@ public class CatalogRateLimitFilter extends OncePerRequestFilter {
   }
 
   private boolean isCatalogRead(HttpServletRequest request) {
-    return "GET".equals(request.getMethod()) && request.getRequestURI().startsWith("/api/products");
+    return "GET".equals(request.getMethod()) && request.getRequestURI().startsWith("/api/v1/products");
   }
 
 }
