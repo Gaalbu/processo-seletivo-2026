@@ -12,8 +12,8 @@ O projeto implementa API backend e interface web para autenticacao, catalogo de 
 
 ## Stack
 
-- Backend: Java 17, Spring Boot 3, Maven
-- Frontend: Next.js, React, TypeScript
+- Backend: Java 21, Spring Boot 3, Maven
+- Frontend: React 18 + Vite, TypeScript
 - Banco de dados: PostgreSQL
 - Cache externo: Redis
 - Migrations: Flyway
@@ -26,7 +26,7 @@ O projeto implementa API backend e interface web para autenticacao, catalogo de 
 
 ```text
 backend/   API Java com Spring Boot
-frontend/  Interface web com Next.js
+frontend/  Interface web com React 18 + Vite
 dev/       Enunciado e referencia visual do desafio
 ```
 
@@ -34,7 +34,7 @@ dev/       Enunciado e referencia visual do desafio
 
 Requisitos:
 
-- Java 17+
+- Java 21+
 - Maven 3.9+
 - Node.js 22+
 - npm
@@ -64,6 +64,8 @@ Rodar frontend:
 cd frontend
 npm install
 npm run dev
+
+O frontend fica em `http://localhost:3000` e faz proxy de `/api` para o backend.
 ```
 
 URLs:
@@ -100,7 +102,7 @@ APP_PAYMENT_PENDING_URL=http://localhost:3000/orders
 Frontend, exemplo em `frontend/.env.example`:
 
 ```text
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
+VITE_API_URL=http://localhost:8080
 ```
 
 ## Seed
@@ -244,9 +246,9 @@ O job backend declara PostgreSQL e Redis como servicos do GitHub Actions.
 - O checkout usa transacao e lock pessimista nos produtos para evitar overselling.
 - Os itens de pedido salvam snapshot de nome, preco unitario e total da linha.
 - JWT stateless simplifica a integracao frontend/backend.
-- Rate limiting foi implementado em memoria para endpoints publicos exigidos.
+- Rate limiting foi implementado com Bucket4j + Redis para endpoints publicos exigidos.
 - Logs de request sao emitidos em JSON com timestamp, metodo, rota, status e duracao.
-- Next.js foi usado no frontend por produtividade e boa experiencia com TypeScript.
+- React 18 + Vite foram usados no frontend conforme blueprint do processo seletivo (SPA, React Router v6, TanStack Query, Zustand).
 
 ## Observabilidade
 
@@ -291,6 +293,5 @@ Cada request gera um log JSON no backend com o formato:
 
 ## Limitacoes Conhecidas
 
-- Rate limiting esta em memoria; em producao seria preferivel Redis/Bucket4j distribuido.
-- Gateway de pagamento real e webhooks nao foram implementados, pois eram opcionais.
+- Documentação dos endpoints do Swagger pode ser melhorada com exemplos mais detalhados.
 - CD/deploy automatizado nao foi implementado, pois era diferencial opcional.
