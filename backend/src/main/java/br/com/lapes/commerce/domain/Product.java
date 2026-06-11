@@ -94,6 +94,10 @@ public class Product {
     this.stock += quantity;
   }
 
+  public void adjustStock(int quantity) {
+    this.stock = quantity;
+  }
+
   public UUID getId() {
     return id;
   }

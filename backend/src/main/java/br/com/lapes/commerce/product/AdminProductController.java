@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,6 +41,12 @@ public class AdminProductController {
   @Operation(summary = "Update product")
   public ProductResponse update(@PathVariable UUID id, @Valid @RequestBody ProductRequest request) {
     return productService.update(id, request);
+  }
+
+  @PatchMapping("/{id}/stock")
+  @Operation(summary = "Adjust product stock")
+  public ProductResponse updateStock(@PathVariable UUID id, @Valid @RequestBody StockRequest request) {
+    return productService.updateStock(id, request);
   }
 
   @DeleteMapping("/{id}")
