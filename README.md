@@ -251,6 +251,19 @@ O job backend declara PostgreSQL e Redis como servicos do GitHub Actions.
 - Rate limiting foi implementado com Bucket4j + Redis para endpoints publicos exigidos.
 - Logs de request sao emitidos em JSON com timestamp, metodo, rota, status e duracao.
 - React 18 + Vite foram usados no frontend conforme blueprint do processo seletivo (SPA, React Router v6, TanStack Query, Zustand).
+- Caddy substituiu o Nginx do blueprint como proxy reverso — veja decisão detalhada abaixo.
+
+### Proxy Reverso: Caddy em vez de Nginx
+
+O blueprint original especifica Nginx como proxy reverso. Optamos pelo Caddy pelas seguintes razoes:
+- Configuracao simplificada (Caddyfile vs nginx.conf)
+- HTTPS automatico (Let's Encrypt) em producao
+- Suporte nativo a rate limiting
+
+O Caddy esta configurado para:
+- Servir o frontend (porta 80)
+- Proxy reverso para o backend (`/api/*` → backend:8080)
+- Rate limiting (10 req/min por IP)
 
 ## Observabilidade
 
