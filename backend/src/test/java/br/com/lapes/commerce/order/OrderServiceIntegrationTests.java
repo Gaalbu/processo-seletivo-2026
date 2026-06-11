@@ -53,7 +53,7 @@ class OrderServiceIntegrationTests {
     insertProduct(PRODUCT_1, "Teclado Test", "perifericos", "100.00", 5);
     insertCartItem(CART_1, PRODUCT_1, 2);
 
-    OrderResponse response = orderService.checkout(USER_1, new CheckoutRequest(null, true));
+    OrderResponse response = orderService.checkout(USER_1, new CheckoutRequest(null, true, null));
 
     assertThat(response.status()).isEqualTo(OrderStatus.PAID);
     assertThat(response.paymentStatus()).isEqualTo(PaymentStatus.APPROVED);
@@ -71,7 +71,7 @@ class OrderServiceIntegrationTests {
     insertProduct(PRODUCT_1, "Teclado Test", "perifericos", "100.00", 5);
     insertCartItem(CART_1, PRODUCT_1, 2);
 
-    OrderResponse response = orderService.checkout(USER_1, new CheckoutRequest(null, false));
+    OrderResponse response = orderService.checkout(USER_1, new CheckoutRequest(null, false, null));
 
     assertThat(response.status()).isEqualTo(OrderStatus.PENDING);
     assertThat(response.paymentStatus()).isEqualTo(PaymentStatus.FAILED);
@@ -85,7 +85,7 @@ class OrderServiceIntegrationTests {
     insertCartItem(CART_1, PRODUCT_1, 2);
     insertCoupon(COUPON_PERCENT, "SAVE10", "PERCENTAGE", "10.00", "100.00", "2030-01-01T00:00:00Z", true);
 
-    OrderResponse response = orderService.checkout(USER_1, new CheckoutRequest("SAVE10", true));
+    OrderResponse response = orderService.checkout(USER_1, new CheckoutRequest("SAVE10", true, null));
 
     assertThat(response.discountAmount()).isEqualByComparingTo("20.00");
     assertThat(response.totalAmount()).isEqualByComparingTo("180.00");
@@ -98,7 +98,7 @@ class OrderServiceIntegrationTests {
     insertCartItem(CART_1, PRODUCT_1, 2);
     insertCoupon(COUPON_EXPIRED, "OLD10", "PERCENTAGE", "10.00", "100.00", "2020-01-01T00:00:00Z", true);
 
-    assertThatThrownBy(() -> orderService.checkout(USER_1, new CheckoutRequest("OLD10", true)))
+    assertThatThrownBy(() -> orderService.checkout(USER_1, new CheckoutRequest("OLD10", true, null)))
         .isInstanceOf(InvalidCouponException.class)
         .hasMessage("Coupon is expired or inactive");
   }
@@ -109,7 +109,7 @@ class OrderServiceIntegrationTests {
     insertCartItem(CART_1, PRODUCT_1, 1);
     insertCoupon(COUPON_MINIMUM, "MIN200", "FIXED_AMOUNT", "20.00", "200.00", "2030-01-01T00:00:00Z", true);
 
-    assertThatThrownBy(() -> orderService.checkout(USER_1, new CheckoutRequest("MIN200", true)))
+    assertThatThrownBy(() -> orderService.checkout(USER_1, new CheckoutRequest("MIN200", true, null)))
         .isInstanceOf(InvalidCouponException.class)
         .hasMessage("Order minimum amount was not reached for this coupon");
   }
@@ -120,10 +120,10 @@ class OrderServiceIntegrationTests {
     insertProduct(PRODUCT_2, "Mouse Test", "perifericos", "100.00", 5);
     insertCoupon(COUPON_PERCENT, "SAVE10", "PERCENTAGE", "10.00", "100.00", "2030-01-01T00:00:00Z", true);
     insertCartItem(CART_1, PRODUCT_1, 1);
-    orderService.checkout(USER_1, new CheckoutRequest("SAVE10", true));
+    orderService.checkout(USER_1, new CheckoutRequest("SAVE10", true, null));
     insertCartItem(CART_1, PRODUCT_2, 1);
 
-    assertThatThrownBy(() -> orderService.checkout(USER_1, new CheckoutRequest("SAVE10", true)))
+    assertThatThrownBy(() -> orderService.checkout(USER_1, new CheckoutRequest("SAVE10", true, null)))
         .isInstanceOf(InvalidCouponException.class)
         .hasMessage("Coupon was already used by this user");
   }
@@ -161,7 +161,7 @@ class OrderServiceIntegrationTests {
   private boolean checkoutWhenReleased(CountDownLatch start, UUID userId) throws InterruptedException {
     start.await();
     try {
-      orderService.checkout(userId, new CheckoutRequest(null, true));
+      orderService.checkout(userId, new CheckoutRequest(null, true, null));
       return true;
     } catch (InsufficientStockException exception) {
       return false;
@@ -169,6 +169,7 @@ class OrderServiceIntegrationTests {
   }
 
   private void cleanDatabase() {
+    jdbcTemplate.update("delete from order_status_history");
     jdbcTemplate.update("delete from payment_transactions");
     jdbcTemplate.update("delete from coupon_usages");
     jdbcTemplate.update("delete from order_items");

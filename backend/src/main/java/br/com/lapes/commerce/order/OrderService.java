@@ -98,6 +98,7 @@ public class OrderService {
     }
 
     User user = userRepository.findById(userId).orElseThrow();
+    Cart cart = cartRepository.findByUserId(userId).orElseThrow(CartNotFoundException::new);
     List<CartItem> cartItems = cartItemRepository.findByCartIdOrderByCreatedAtAsc(cart.getId());
     if (cartItems.isEmpty()) {
       throw new EmptyCartException();
