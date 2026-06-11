@@ -1,6 +1,8 @@
 package br.com.lapes.commerce.auth;
 
 import br.com.lapes.commerce.security.AuthenticatedUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.Duration;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Auth", description = "Authentication and account management")
 public class AuthController {
 
   private final AuthService authService;
@@ -26,17 +29,20 @@ public class AuthController {
     this.tokenBlacklist = tokenBlacklist;
   }
 
+  @Operation(summary = "Register a new user")
   @PostMapping("/register")
   @ResponseStatus(HttpStatus.CREATED)
   public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
     return authService.register(request);
   }
 
+  @Operation(summary = "Authenticate and get JWT token")
   @PostMapping("/login")
   public AuthResponse login(@Valid @RequestBody LoginRequest request) {
     return authService.login(request);
   }
 
+  @Operation(summary = "Invalidate current JWT token")
   @PostMapping("/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @SecurityRequirement(name = "bearerAuth")
@@ -48,6 +54,7 @@ public class AuthController {
     }
   }
 
+  @Operation(summary = "Get current authenticated user")
   @GetMapping("/me")
   @SecurityRequirement(name = "bearerAuth")
   public AuthResponse.UserResponse me(@AuthenticationPrincipal AuthenticatedUser user) {
